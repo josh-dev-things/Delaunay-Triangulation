@@ -1,4 +1,4 @@
-# An implementation by Leo, Josh and John.
+# An implementation by Leo, Josh.
 
 from matplotlib import patches
 import matplotlib.pyplot as plt
@@ -39,6 +39,9 @@ class triangle:
         self.p3 = p3
         self.circumCircle = None
 
+        self.generateCircumCircle()
+        self.draw()
+
     def generateCircumCircle(self):
         p1 = self.p1
         p2 = self.p2
@@ -66,13 +69,33 @@ class triangle:
         p2y = p2.Y()
         p3x = p3.X()
         p3y = p3.Y()
+
+        x12, y12 = [p1x, p2x],[p1y, p2y]
+        x23, y23 = [p2x, p3x],[p2y, p3y]
+        x13, y13 = [p1x, p3x],[p1y, p3y]
+
         print(p1x)
-        plt.plot(p1x, p1y, p2x, p2y, p3x, p3y, marker="o", c="teal")
+        plt.plot(p1x, p1y, p2x, p2y, p3x, p3y, marker="o", c="black")
+        plt.plot(x12,y12,x23,y23,x13,y13, marker='o', c="black")
         circumCircle = patches.Circle(xy=(self.circumCircle.getCentre()), radius=self.circumCircle.radius, fill=False)
         plt.gca().add_patch(circumCircle)
         plt.axis('scaled')
 
-    
+class mesh:
+    def __init__(self, initialTriangles : list) -> None:
+        self.triangles = []
+        for i in range(len(initialTriangles)):
+            self.triangles.append(initialTriangles[i])
+
+    def addPoint(self, newPoint : point):
+        containingTriangles = []
+        for triangle in self.triangles:
+            if triangle.circumCircle.isPointContained(newPoint):
+                containingTriangles.append(triangle)
+        mesh2 = mesh(containingTriangles)
+
+    def remesh(self, mesh):
+        pass
 
 
 if __name__ == "__main__":
@@ -83,8 +106,12 @@ if __name__ == "__main__":
     a1 = point(0.5, 10) #Anchor that will be eventually deleted. Anchors form the initial triangle
     a2 = point(-10, -10)
     a3 = point(9, -9)
+    
+    points = []
+    for i in range(numberOfPoints):
+        newPoint = point(random.random(), random.random())
+        points.append(newPoint)
+        plt.plot(newPoint.X(), newPoint.Y(), marker="o", c="teal")
 
     t = triangle(a1, a2, a3)
-    t.generateCircumCircle()
-    t.draw()
     plt.show()
