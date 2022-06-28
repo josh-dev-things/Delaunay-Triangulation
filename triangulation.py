@@ -89,13 +89,63 @@ class mesh:
 
     def addPoint(self, newPoint : point):
         containingTriangles = []
-        for triangle in self.triangles:
+        indicesToPop = []
+        for i in range(len(self.triangles)):
+            triangle = self.triangles[i]
             if triangle.circumCircle.isPointContained(newPoint):
                 containingTriangles.append(triangle)
-        mesh2 = mesh(containingTriangles)
+                # self.triangles.pop(i)
+                indicesToPop.append(i)
 
-    def remesh(self, mesh):
-        pass
+        for index in indicesToPop:
+            self.triangles.pop(index)
+
+        remesh = mesh(containingTriangles)
+
+        #Now iterate through all triangles of mesh2 & add verticies to new array
+        repoint = []
+        for i in range(len(remesh)):
+            thisTriangle = remesh[i]
+            if not self.isOverlappingVertices(repoint, thisTriangle.p1): repoint.append(thisTriangle.p1)
+            if not self.isOverlappingVertices(repoint, thisTriangle.p2): repoint.append(thisTriangle.p2)
+            if not self.isOverlappingVertices(repoint, thisTriangle.p3): repoint.append(thisTriangle.p3)
+
+        #Now create delta
+        delta = []
+        repointATan2 = []
+        for point in repoint:
+            dX = point.X() - newPoint.X()
+            dY = point.Y() - newPoint.Y()
+            delta.append(point(dX, dY))
+            repointATan2.append(np.arctan2(dX, dY))
+
+        #Sort (This may or may not work... who knows ~ Josh)
+        for i in range(1, len(repoint)):
+            key = repointATan2[i]
+            keyPoint = repoint[i]
+
+            # Move elements of repoint[0..i-1], that are
+            # greater than key, to one position ahead
+            # of their current position
+            j = i-1
+            while j >=0 and key < repointATan2[j] :
+                    repointATan2[j+1] = repointATan2[j]
+                    repoint[j+1] = repoint[j]
+                    j -= 1
+            repointATan2[j+1] = key
+            repoint[j+1] = keyPoint
+
+
+    def isOverlappingVertices(self, vertices : list, point : point) -> bool:
+        isOverlap = False
+        for i in range(len(vertices)):
+            thisVertex = vertices[i]
+            if point.X() == thisVertex.X() and point.Y() == thisVertex.Y():
+                isOverlap = True
+                return isOverlap
+        return isOverlap
+
+
 
 
 if __name__ == "__main__":
@@ -107,11 +157,11 @@ if __name__ == "__main__":
     a2 = point(-10, -10)
     a3 = point(9, -9)
     
-    points = []
+    points = [] #Point cloud
     for i in range(numberOfPoints):
         newPoint = point(random.random(), random.random())
         points.append(newPoint)
         plt.plot(newPoint.X(), newPoint.Y(), marker="o", c="teal")
 
-    t = triangle(a1, a2, a3)
+    masterTriangle = triangle(a1, a2, a3)
     plt.show()
