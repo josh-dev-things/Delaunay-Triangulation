@@ -1,5 +1,4 @@
 # An implementation by Leo, Josh.
-
 from matplotlib import patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,6 +9,12 @@ class point:
     def __init__(self, x, y) -> None:
         self.__x = x
         self.__y = y
+
+    def __str__(self) -> str:
+       return f"Point: ({self.__x}, {self.__y})"
+
+    def __repr__(self) -> str:
+        return f"Point: ({self.__x}, {self.__y})"
 
     def X(self) -> float:
         return self.__x
@@ -40,7 +45,6 @@ class triangle:
         self.circumCircle = None
 
         self.generateCircumCircle()
-        self.draw()
 
     def generateCircumCircle(self):
         p1 = self.p1
@@ -91,9 +95,9 @@ class mesh:
         containingTriangles = []
         indicesToPop = []
         for i in range(len(self.triangles)):
-            triangle = self.triangles[i]
-            if triangle.circumCircle.isPointContained(newPoint):
-                containingTriangles.append(triangle)
+            __triangle = self.triangles[i]
+            if __triangle.circumCircle.isPointContained(newPoint):
+                containingTriangles.append(__triangle)
                 # self.triangles.pop(i)
                 indicesToPop.append(i)
 
@@ -104,8 +108,8 @@ class mesh:
 
         #Now iterate through all triangles of mesh2 & add verticies to new array
         repoint = []
-        for i in range(len(remesh)):
-            thisTriangle = remesh[i]
+        for i in range(len(remesh.triangles)):
+            thisTriangle = remesh.triangles[i]
             if not self.isOverlappingVertices(repoint, thisTriangle.p1): repoint.append(thisTriangle.p1)
             if not self.isOverlappingVertices(repoint, thisTriangle.p2): repoint.append(thisTriangle.p2)
             if not self.isOverlappingVertices(repoint, thisTriangle.p3): repoint.append(thisTriangle.p3)
@@ -113,11 +117,13 @@ class mesh:
         #Now create delta
         delta = []
         repointATan2 = []
-        for point in repoint:
-            dX = point.X() - newPoint.X()
-            dY = point.Y() - newPoint.Y()
+        for __point in repoint:
+            dX = __point.X() - newPoint.X()
+            dY = __point.Y() - newPoint.Y()
             delta.append(point(dX, dY))
             repointATan2.append(np.arctan2(dX, dY))
+
+        print(repoint)
 
         #Sort (This may or may not work... who knows ~ Josh)
         for i in range(1, len(repoint)):
@@ -128,12 +134,24 @@ class mesh:
             # greater than key, to one position ahead
             # of their current position
             j = i-1
-            while j >=0 and key < repointATan2[j] :
+            while j >=0 and key < repointATan2[j]:
                     repointATan2[j+1] = repointATan2[j]
                     repoint[j+1] = repoint[j]
                     j -= 1
             repointATan2[j+1] = key
             repoint[j+1] = keyPoint
+
+        print(repoint)
+
+        #Now make some triangles?
+        for i in range(len(repoint)):
+            modulus = len(repoint)
+            p1 = repoint[i % modulus] #TODO Make sure this isnt broken
+            p2 = repoint[(i+1) % modulus]
+            newTriangle = triangle(p1, p2, newPoint)
+            newTriangle.draw()
+            self.triangles.append(newTriangle) #Add new triangle to mesh data
+
 
 
     def isOverlappingVertices(self, vertices : list, point : point) -> bool:
@@ -144,6 +162,12 @@ class mesh:
                 isOverlap = True
                 return isOverlap
         return isOverlap
+
+    def draw(self):
+        plt.show()
+        for triangle__ in self.triangles:
+            triangle__.draw()
+
 
 
 
@@ -158,10 +182,13 @@ if __name__ == "__main__":
     a3 = point(9, -9)
     
     points = [] #Point cloud
+    masterTriangle = triangle(a1, a2, a3)
+    trianglesForMesh = [masterTriangle]
+    thisMesh = mesh(trianglesForMesh)
     for i in range(numberOfPoints):
         newPoint = point(random.random(), random.random())
-        points.append(newPoint)
+        thisMesh.addPoint(newPoint)
+        # points.append(newPoint)
         plt.plot(newPoint.X(), newPoint.Y(), marker="o", c="teal")
 
-    masterTriangle = triangle(a1, a2, a3)
     plt.show()
