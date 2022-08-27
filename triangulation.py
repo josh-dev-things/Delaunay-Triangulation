@@ -6,17 +6,22 @@ import random
 import utils
 import sys
 
-def progressbar(it, prefix="", size=60, out=sys.stdout): # Python3.3+
+# Added because I liked the pretty progress bar.
+
+
+def progressbar(it, prefix="", size=60, out=sys.stdout):  # Python3.3+
     count = len(it)
+
     def show(j):
         x = int(size*j/count)
-        print("{}[{}{}] {}/{}".format(prefix, u"█"*x, "."*(size-x), j, count), 
-                end='\r', file=out, flush=True)
+        print("{}[{}{}] {}/{}".format(prefix, u"█"*x, "."*(size-x), j, count),
+              end='\r', file=out, flush=True)
     show(0)
     for i, item in enumerate(it):
         yield item
         show(i+1)
     print("\n", flush=True, file=out)
+
 
 class point:
     def __init__(self, x, y) -> None:
@@ -24,7 +29,7 @@ class point:
         self.__y = y
 
     def __str__(self) -> str:
-       return f"Point: ({self.__x}, {self.__y})"
+        return f"Point: ({self.__x}, {self.__y})"
 
     def __repr__(self) -> str:
         return f"Point: ({self.__x}, {self.__y})"
@@ -35,20 +40,23 @@ class point:
     def Y(self) -> float:
         return self.__y
 
+
 class circumCircle:
-    def __init__(self, centrePoint : point, radius : float) -> None:
+    def __init__(self, centrePoint: point, radius: float) -> None:
         self.radius = radius
         self.centre = centrePoint
 
-    def isPointContained(self, testPoint : point) -> bool:
-        distanceFromCentre = utils.getMagnitudeOfVector(self.centre.X(), testPoint.X(), self.centre.Y(), testPoint.Y())
-        if(distanceFromCentre <= self.radius):
+    def isPointContained(self, testPoint: point) -> bool:
+        distanceFromCentre = utils.getMagnitudeOfVector(
+            self.centre.X(), testPoint.X(), self.centre.Y(), testPoint.Y())
+        if (distanceFromCentre <= self.radius):
             return True
         else:
             return False
 
     def getCentre(self) -> tuple:
-        return(self.centre.X(), self.centre.Y())
+        return (self.centre.X(), self.centre.Y())
+
 
 class triangle:
     def __init__(self, p1, p2, p3) -> None:
@@ -64,24 +72,28 @@ class triangle:
         p2 = point(self.p2.X(), self.p2.Y())
         p3 = point(self.p3.X(), self.p3.Y())
 
-        #BUG
+        # BUG
         # if (p2.Y() - p1.Y()) != 0:
         #     m_1_2 = ((p1.X() - p2.X())/(p2.Y() - p1.Y())) #Finding the gradient of the bisector of points 1 & 2
         # else:
-        m_1_2 = ((p1.X() - p2.X())/(p2.Y() - p1.Y())) if (p2.Y() - p1.Y()) != 0 else ((p1.X() - p2.X())/(p2.Y() - p1.Y() + 0.000001))
+        m_1_2 = ((p1.X() - p2.X())/(p2.Y() - p1.Y())) if (p2.Y() - p1.Y()
+                                                          ) != 0 else ((p1.X() - p2.X())/(p2.Y() - p1.Y() + 0.000001))
 
         # try:
         #     m_2_3 = ((p2.X() - p3.X())/(p3.Y() - p2.Y())) # 2 & 3
         # except:
         #     self.generateCircumCircle(p3YOffset = p3.Y()/1000 + 1/1000)
         #     return
-        m_2_3 = ((p2.X() - p3.X())/(p3.Y() - p2.Y())) if (p3.Y() - p2.Y()) != 0 else ((p2.X() - p3.X())/(p3.Y() - p2.Y() + 0.000001))
-        #BUG
+        m_2_3 = ((p2.X() - p3.X())/(p3.Y() - p2.Y())) if (p3.Y() - p2.Y()
+                                                          ) != 0 else ((p2.X() - p3.X())/(p3.Y() - p2.Y() + 0.000001))
+        # BUG
 
-        c_1_2 = ((p1.Y() + p2.Y())/2)-(((p1.X()+p2.X())/2) * m_1_2) #Finding c (y intercept, consult GCSE Maths)
+        # Finding c (y intercept, consult GCSE Maths)
+        c_1_2 = ((p1.Y() + p2.Y())/2)-(((p1.X()+p2.X())/2) * m_1_2)
         c_2_3 = ((p2.Y() + p3.Y())/2)-(((p2.X()+p3.X())/2) * m_2_3)
-        
-        if (m_2_3 - m_1_2) == 0: #This prevents a divide by zero error later on.
+
+        # This prevents a divide by zero error later on.
+        if (m_2_3 - m_1_2) == 0:
             m_2_3 = m_2_3 + 0.000001
 
         x = (c_1_2 - c_2_3)/(m_2_3 - m_1_2)
@@ -91,13 +103,13 @@ class triangle:
         centrePoint = point(x, y)
         self.circumCircle = circumCircle(centrePoint, radius)
 
-    def pointIsVertex(self, pointToCheck : point) -> bool:
+    def pointIsVertex(self, pointToCheck: point) -> bool:
         if pointToCheck == self.p1 or pointToCheck == self.p2 or pointToCheck == self.p3:
             return True
         else:
             return False
 
-    def draw(self, displayCircumCircle = False):
+    def draw(self, displayCircumCircle=False):
         p1 = self.p1
         p2 = self.p2
         p3 = self.p3
@@ -109,29 +121,31 @@ class triangle:
         p3x = p3.X()
         p3y = p3.Y()
 
-        x12, y12 = [p1x, p2x],[p1y, p2y]
-        x23, y23 = [p2x, p3x],[p2y, p3y]
-        x13, y13 = [p1x, p3x],[p1y, p3y]
+        x12, y12 = [p1x, p2x], [p1y, p2y]
+        x23, y23 = [p2x, p3x], [p2y, p3y]
+        x13, y13 = [p1x, p3x], [p1y, p3y]
 
-        #print(p1x)
+        # print(p1x)
         plt.plot(p1x, p1y, p2x, p2y, p3x, p3y, marker="o", c="black")
-        plt.plot(x12,y12,x23,y23,x13,y13, marker='o', c="black")
+        plt.plot(x12, y12, x23, y23, x13, y13, marker='o', c="black")
 
         if displayCircumCircle:
-            circumCircle = patches.Circle(xy=(self.circumCircle.getCentre()), radius=self.circumCircle.radius, fill=False, edgecolor="grey", alpha=0.1)
+            circumCircle = patches.Circle(xy=(self.circumCircle.getCentre(
+            )), radius=self.circumCircle.radius, fill=False, edgecolor="grey", alpha=0.1)
             plt.gca().add_patch(circumCircle)
 
+
 class mesh:
-    def __init__(self, initialTriangles : list) -> None:
+    def __init__(self, initialTriangles: list) -> None:
         self.triangles = []
         for i in range(len(initialTriangles)):
             self.triangles.append(initialTriangles[i])
-    
+
     def __str__(self) -> str:
         return f"Mesh with {len(self.triangles)} triangles"
 
-    def addPoint(self, newPoint : point):
-        #print(self)
+    def addPoint(self, newPoint: point):
+        # print(self)
         containingTriangles = []
         indicesToPop = []
         for i in range(len(self.triangles)):
@@ -141,21 +155,25 @@ class mesh:
                 # self.triangles.pop(i)
                 indicesToPop.append(i)
 
-        for index in sorted(indicesToPop, reverse=True): #Iterate through it backwards to not throw off other index
+        # Iterate through it backwards to not throw off other index
+        for index in sorted(indicesToPop, reverse=True):
             #print(f"Popping triangle at index {index}. Len Triangles: {len(self.triangles)}")
             self.triangles.pop(index)
 
         remesh = mesh(containingTriangles)
 
-        #Now iterate through all triangles of mesh2 & add verticies to new array
+        # Now iterate through all triangles of mesh2 & add verticies to new array
         repoint = []
         for i in range(len(remesh.triangles)):
             thisTriangle = remesh.triangles[i]
-            if not self.isOverlappingVertices(repoint, thisTriangle.p1): repoint.append(thisTriangle.p1)
-            if not self.isOverlappingVertices(repoint, thisTriangle.p2): repoint.append(thisTriangle.p2)
-            if not self.isOverlappingVertices(repoint, thisTriangle.p3): repoint.append(thisTriangle.p3)
+            if not self.isOverlappingVertices(repoint, thisTriangle.p1):
+                repoint.append(thisTriangle.p1)
+            if not self.isOverlappingVertices(repoint, thisTriangle.p2):
+                repoint.append(thisTriangle.p2)
+            if not self.isOverlappingVertices(repoint, thisTriangle.p3):
+                repoint.append(thisTriangle.p3)
 
-        #Now create delta
+        # Now create delta
         delta = []
         repointATan2 = []
         for __point in repoint:
@@ -164,9 +182,9 @@ class mesh:
             delta.append(point(dX, dY))
             repointATan2.append(np.arctan2(dX, dY))
 
-        #print(repoint)
+        # print(repoint)
 
-        #Sort (This may or may not work... who knows ~ Josh)
+        # Sort (This may or may not work... who knows ~ Josh)
         for i in range(1, len(repoint)):
             key = repointATan2[i]
             keyPoint = repoint[i]
@@ -175,30 +193,28 @@ class mesh:
             # greater than key, to one position ahead
             # of their current position
             j = i-1
-            while j >=0 and key < repointATan2[j]:
-                    repointATan2[j+1] = repointATan2[j]
-                    repoint[j+1] = repoint[j]
-                    j -= 1
+            while j >= 0 and key < repointATan2[j]:
+                repointATan2[j+1] = repointATan2[j]
+                repoint[j+1] = repoint[j]
+                j -= 1
             repointATan2[j+1] = key
             repoint[j+1] = keyPoint
 
-        #print(repoint)
+        # print(repoint)
 
-        #Now make some triangles?
+        # Now make some triangles?
         for i in range(len(repoint)):
             modulus = len(repoint)
-            p1 = repoint[i % modulus] #TODO Make sure this isnt broken
+            p1 = repoint[i % modulus]  # TODO Make sure this isnt broken
             p2 = repoint[(i+1) % modulus]
             newTriangle = triangle(p1, p2, newPoint)
             newTriangle.draw()
-            self.triangles.append(newTriangle) #Add new triangle to mesh data
-        #print(self)
+            self.triangles.append(newTriangle)  # Add new triangle to mesh data
+        # print(self)
 
-        #self.draw()
+        # self.draw()
 
-
-
-    def isOverlappingVertices(self, vertices : list, point : point) -> bool:
+    def isOverlappingVertices(self, vertices: list, point: point) -> bool:
         isOverlap = False
         for i in range(len(vertices)):
             thisVertex = vertices[i]
@@ -215,29 +231,28 @@ class mesh:
         plt.axis('scaled')
         plt.show()
 
-    def cullConnections(self, pointToCull : point):
+    def cullConnections(self, pointToCull: point):
         for i in reversed(range(len(self.triangles))):
             thisTriangle = self.triangles[i]
             if thisTriangle.pointIsVertex(pointToCull):
                 self.triangles.pop(i)
 
 
-
-
-
 if __name__ == "__main__":
-    a1 = point(50, 100) #Anchor that will be eventually deleted. Anchors form the initial triangle
+    # Anchor that will be eventually deleted. Anchors form the initial triangle
+    a1 = point(50, 100)
     a2 = point(-100, -100)
     a3 = point(90, -90)
-    
-    points = [] #Point cloud
+
+    points = []  # Point cloud
     masterTriangle = triangle(a1, a2, a3)
     trianglesForMesh = [masterTriangle]
     thisMesh = mesh(trianglesForMesh)
     n = int(input("Enter number of points to generate: "))
     for i in progressbar(range(n), prefix="Triangulating Mesh: "):
         plt.cla()
-        newPoint = point(random.random() * 10, random.random() * 10) #BUG Does not like overlapping points
+        # BUG Does not like overlapping points
+        newPoint = point(random.random() * 10, random.random() * 10)
         thisMesh.addPoint(newPoint)
         # points.append(newPoint)
         plt.plot(newPoint.X(), newPoint.Y(), marker="o", c="teal")
